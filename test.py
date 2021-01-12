@@ -47,6 +47,8 @@ def feature_evaluation(cl_data_file, model, n_way = 5, n_support = 5, n_query = 
 if __name__ == '__main__':
     params = parse_args('test')
 
+    print("Loaded params")
+
     acc_all = []
 
     iter_num = 600
@@ -58,9 +60,21 @@ if __name__ == '__main__':
         params.model = 'Conv4S'
 
     if params.method == 'baseline':
-        model           = BaselineFinetune( model_dict[params.model], **few_shot_params )
+        print("Model Parameter:")
+        print(params.model)
+        print("Model Dict:")
+        print(model_dict[params.model])
+        model = BaselineFinetune(model_dict[params.model], **few_shot_params)
+        if params.finetune == 'triplet':
+            model = BaselineFinetune(model_dict[params.model], **few_shot_params)
     elif params.method == 'baseline++':
-        model           = BaselineFinetune( model_dict[params.model], loss_type = 'dist', **few_shot_params )
+        print("Model Parameter:")
+        print(params.model)
+        print("Model Dict:")
+        print(model_dict[params.model])
+        model = BaselineFinetune(model_dict[params.model], loss_type='dist', **few_shot_params)
+        if params.finetune == 'triplet':
+            print('Triplet fine-tuning here')
     elif params.method == 'protonet':
         model           = ProtoNet( model_dict[params.model], **few_shot_params )
     elif params.method == 'matchingnet':
@@ -160,8 +174,8 @@ if __name__ == '__main__':
         aug_str = '-aug' if params.train_aug else ''
         aug_str += '-adapted' if params.adaptation else ''
         if params.method in ['baseline', 'baseline++'] :
-            exp_setting = '%s-%s-%s-%s%s %sshot %sway_test' %(params.dataset, split_str, params.model, params.method, aug_str, params.n_shot, params.test_n_way )
+            exp_setting = '%s-%s-%s-%s-%s%s %sshot %sway_test' %(params.dataset, split_str, params.model, params.finetune, params.method, aug_str, params.n_shot, params.test_n_way )
         else:
-            exp_setting = '%s-%s-%s-%s%s %sshot %sway_train %sway_test' %(params.dataset, split_str, params.model, params.method, aug_str , params.n_shot , params.train_n_way, params.test_n_way )
+            exp_setting = '%s-%s-%s-%s-%s%s %sshot %sway_train %sway_test' %(params.dataset, split_str, params.model, params.finetune, params.method, aug_str , params.n_shot , params.train_n_way, params.test_n_way )
         acc_str = '%d Test Acc = %4.2f%% +- %4.2f%%' %(iter_num, acc_mean, 1.96* acc_std/np.sqrt(iter_num))
         f.write( 'Time: %s, Setting: %s, Acc: %s \n' %(timestamp,exp_setting,acc_str)  )

@@ -43,6 +43,9 @@ class distLinear(nn.Module):
 
         return scores
 
+class softNNLoss(nn.Module):
+    pass
+
 class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()

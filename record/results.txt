@@ -1,0 +1,9 @@
+Time: 20201112-135333, Setting: omniglot-novel-Conv4S-baseline 5shot 5way_test, Acc: 600 Test Acc = 99.10% +- 0.11% 
+Time: 20201112-141547, Setting: cross_char-novel-Conv4S-baseline 5shot 5way_test, Acc: 600 Test Acc = 85.95% +- 0.56% 
+Time: 20201210-155624, Setting: cross_char-novel-Conv4S-baseline 5shot 5way_test, Acc: 600 Test Acc = 85.72% +- 0.58% 
+Time: 20201210-171123, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 85.97% +- 0.57% 
+Time: 20201210-173155, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 86.46% +- 0.55% 
+Time: 20210111-123909, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 86.26% +- 0.58% 
+Time: 20210111-233220, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 72.83% +- 0.90% 
+Time: 20210112-000546, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 69.10% +- 1.07% 
+Time: 20210112-003728, Setting: cross_char-novel-Conv4S-None-baseline 5shot 5way_test, Acc: 600 Test Acc = 52.75% +- 1.89% 

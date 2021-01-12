@@ -5,9 +5,10 @@ from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
 from methods.meta_template import MetaTemplate
+from methods.snnl import *
 
 class BaselineFinetune(MetaTemplate):
-    def __init__(self, model_func,  n_way, n_support, loss_type = "softmax"):
+    def __init__(self, model_func,  n_way, n_support, loss_type="softmax"):
         super(BaselineFinetune, self).__init__( model_func,  n_way, n_support)
         self.loss_type = loss_type
 
@@ -25,15 +26,24 @@ class BaselineFinetune(MetaTemplate):
         y_support = Variable(y_support.cuda())
 
         if self.loss_type == 'softmax':
-            linear_clf = nn.Linear(self.feat_dim, self.n_way)
-        elif self.loss_type == 'dist':        
+            linear_clf = nn.Sequential(
+                    torch.nn.Linear(self.feat_dim, self.feat_dim),
+                    torch.nn.ReLU(),
+                    torch.nn.Linear(self.feat_dim, self.n_way))
+            #linear_clf = nn.Linear(self.feat_dim, self.n_way)
+        elif self.loss_type == 'dist':
             linear_clf = backbone.distLinear(self.feat_dim, self.n_way)
         linear_clf = linear_clf.cuda()
-
+        
         set_optimizer = torch.optim.SGD(linear_clf.parameters(), lr = 0.01, momentum=0.9, dampening=0.9, weight_decay=0.001)
 
         loss_function = nn.CrossEntropyLoss()
         loss_function = loss_function.cuda()
+
+        loss_function_ = snn_loss(2.0, True)
+        #loss_function_ = loss_function_.cuda()
+
+        alpha = 0.8
         
         batch_size = 4
         support_size = self.n_way* self.n_support
@@ -45,7 +55,8 @@ class BaselineFinetune(MetaTemplate):
                 z_batch = z_support[selected_id]
                 y_batch = y_support[selected_id] 
                 scores = linear_clf(z_batch)
-                loss = loss_function(scores,y_batch)
+                # loss = loss_function(scores,y_batch)
+                loss = alpha * loss_function(scores,y_batch) + (1-alpha) * loss_function_(scores, y_batch)
                 loss.backward()
                 set_optimizer.step()
         scores = linear_clf(z_query)
@@ -54,5 +65,3 @@ class BaselineFinetune(MetaTemplate):
 
     def set_forward_loss(self,x):
         raise ValueError('Baseline predict on pretrained feature and do not support finetune backbone')
-        
-
