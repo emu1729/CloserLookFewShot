@@ -35,28 +35,33 @@ class BaselineFinetune(MetaTemplate):
             linear_clf = backbone.distLinear(self.feat_dim, self.n_way)
         linear_clf = linear_clf.cuda()
         
-        set_optimizer = torch.optim.SGD(linear_clf.parameters(), lr = 0.01, momentum=0.9, dampening=0.9, weight_decay=0.001)
+        #set_optimizer = torch.optim.SGD(linear_clf.parameters(), lr = 0.01, momentum=0.9, dampening=0.9, weight_decay=0.001)
+        set_optimizer = torch.optim.SGD(linear_clf.parameters(), lr=0.01)
 
         loss_function = nn.CrossEntropyLoss()
         loss_function = loss_function.cuda()
 
-        loss_function_ = snn_loss(2.0, True)
+        loss_function_ = snn_loss(1.0, True, cuda=True, optimized=False)
         #loss_function_ = loss_function_.cuda()
-
-        alpha = 0.8
         
-        batch_size = 4
+        batch_size = 25
+        epochs = 100
+
         support_size = self.n_way* self.n_support
-        for epoch in range(100):
+        for epoch in range(epochs):
             rand_id = np.random.permutation(support_size)
             for i in range(0, support_size , batch_size):
                 set_optimizer.zero_grad()
-                selected_id = torch.from_numpy( rand_id[i: min(i+batch_size, support_size) ]).cuda()
+                selected_id = torch.from_numpy(rand_id[i: min(i+batch_size, support_size)]).cuda()
                 z_batch = z_support[selected_id]
                 y_batch = y_support[selected_id] 
                 scores = linear_clf(z_batch)
+                embeds = linear_clf[-2](z_batch)
                 # loss = loss_function(scores,y_batch)
-                loss = alpha * loss_function(scores,y_batch) + (1-alpha) * loss_function_(scores, y_batch)
+                print(loss_function_(embeds, y_batch))
+                print(loss_function(scores, y_batch))
+                loss = loss_function(scores, y_batch) - 10.0 * loss_function_(embeds, y_batch)
+                print("Tot loss", loss)
                 loss.backward()
                 set_optimizer.step()
         scores = linear_clf(z_query)
